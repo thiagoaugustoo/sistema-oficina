@@ -1,0 +1,77 @@
+/* src/index.css */
+:root {
+  --bg-app: #030712;       /* Azul muito escuro (quase preto) */
+  --bg-coluna: #0b1121;    /* Azul escuro profundo */
+  --bg-card: #111827;      /* Fundo dos cards */
+  --bg-input: #1f2937;     /* Fundo das caixas de texto */
+  --border-color: #1f2937; /* Linhas discretas */
+  --red-accent: #e11d48;   /* Vermelho principal */
+  --red-hover: #be123c;    /* Vermelho ao clicar */
+  --text-main: #f8fafc;    /* Branco/Gelo para texto principal */
+  --text-muted: #94a3b8;   /* Cinzento azulado para texto secundário */
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Barra de rolagem estilizada */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-app); }
+::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--red-accent); }
+
+/* Classes utilitárias para Inputs e Botões Dinâmicos */
+.input-dark {
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  transition: all 0.3s ease;
+}
+.input-dark:focus {
+  border-color: var(--red-accent);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.2);
+}
+
+.btn-red {
+  background: linear-gradient(135deg, var(--red-accent) 0%, #9f1239 100%);
+  color: white;
+  border: none;
+  transition: all 0.3s ease;
+}
+.btn-red:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.4);
+}
+.btn-red:disabled { filter: grayscale(100%); opacity: 0.5; cursor: not-allowed; }
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  transition: all 0.3s ease;
+}
+.btn-outline:hover:not(:disabled) {
+  border-color: var(--red-accent);
+  color: var(--red-accent);
+}
+
+.card-hover { transition: transform 0.2s ease, border-color 0.2s ease; }
+.card-hover:hover { border-color: #334155; }
+
+/* Previne o zoom automático no iOS Safari ao focar em inputs */
+input, 
+textarea, 
+select, 
+button {
+  font-size: 16px !important;
+}
+
+/* Desativa o duplo toque para dar zoom e bloqueia comportamentos de toque indesejados */
+* {
+  touch-action: manipulation;
+}

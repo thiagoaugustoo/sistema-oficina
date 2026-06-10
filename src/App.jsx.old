@@ -1,0 +1,137 @@
+// src/App.jsx
+import { useState } from 'react';
+import { useCarros, useHistorico, useMutationsCarro } from './hooks/useCarros';
+import CardCarro from './components/CardCarro';
+import FormNovoCarro from './components/FormNovoCarro';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { Search } from 'lucide-react';
+
+export default function App() {
+  const { data: carros, isLoading: carregandoCarros, error: erroCarros } = useCarros();
+  const { data: historico, isLoading: carregandoHistorico } = useHistorico();
+  const { reordenarCarros } = useMutationsCarro();
+
+  // Estado para a barra de busca do histórico
+  const [termoBusca, setTermoBusca] = useState('');
+
+  const handleOnDragEnd = (result) => {
+    if (!result.destination) return;
+    
+    const itensReordenados = Array.from(carros || []);
+    const [itemRemovido] = itensReordenados.splice(result.source.index, 1);
+    itensReordenados.splice(result.destination.index, 0, itemRemovido);
+
+    const listaComNovaOrdem = itensReordenados.map((carro, index) => ({
+      id: carro.id,
+      ordem: index
+    }));
+
+    reordenarCarros.mutate(listaComNovaOrdem);
+  };
+
+  // Lógica de filtro: se tiver algo digitado, filtra por placa ou modelo
+  const historicoFiltrado = historico?.filter((carro) => {
+    const termo = termoBusca.toLowerCase();
+    const placa = carro.placa.toLowerCase();
+    const modelo = carro.modelo.toLowerCase();
+    return placa.includes(termo) || modelo.includes(termo);
+  });
+
+  return (
+    <div style={{ padding: '20px', fontFamily: 'sans-serif', maxWidth: '1400px', margin: '0 auto' }}>
+      <h1 style={{ color: '#1e293b' }}>Gestão da Oficina</h1>
+      
+      <FormNovoCarro />
+
+      <div style={{ display: 'flex', gap: '24px', marginTop: '20px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        
+        {/* COLUNA 1: EM ANDAMENTO */}
+        <DragDropContext onDragEnd={handleOnDragEnd}>
+          <div style={{ 
+            backgroundColor: '#e2e8f0', padding: '16px', borderRadius: '8px', minWidth: '340px', flex: 1
+          }}>
+            <h2 style={{ marginTop: 0, fontSize: '16px', textTransform: 'uppercase', color: '#334155', display: 'flex', justifyContent: 'space-between' }}>
+              <span>Em Andamento</span>
+              <span style={{ backgroundColor: '#cbd5e1', padding: '2px 8px', borderRadius: '12px', fontSize: '14px' }}>
+                {carregandoCarros ? '...' : carros?.length || 0}
+              </span>
+            </h2>
+            
+            <Droppable droppableId="coluna-em-andamento">
+              {(provided) => (
+                <div 
+                  {...provided.droppableProps} 
+                  ref={provided.innerRef} 
+                  style={{ marginTop: '16px', minHeight: '150px' }}
+                >
+                  {erroCarros && <p style={{ color: 'red' }}>Erro: {erroCarros.message}</p>}
+                  
+                  {!carregandoCarros && carros?.map((carro, index) => (
+                    <Draggable key={carro.id} draggableId={carro.id} index={index}>
+                      {(providedDrag) => (
+                        <div
+                          ref={providedDrag.innerRef}
+                          {...providedDrag.draggableProps}
+                          {...providedDrag.dragHandleProps}
+                        >
+                          <CardCarro carro={carro} />
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  
+                  {provided.placeholder}
+                  {!carregandoCarros && carros?.length === 0 && (
+                    <p style={{ textAlign: 'center', color: '#64748b', fontStyle: 'italic' }}>Pátio vazio.</p>
+                  )}
+                </div>
+              )}
+            </Droppable>
+          </div>
+        </DragDropContext>
+
+        {/* COLUNA 2: HISTÓRICO */}
+        <div style={{ 
+          backgroundColor: '#d1fae5', padding: '16px', borderRadius: '8px', minWidth: '340px', flex: 1
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+            <h2 style={{ margin: 0, fontSize: '16px', textTransform: 'uppercase', color: '#065f46' }}>
+              Histórico
+            </h2>
+            <span style={{ backgroundColor: '#a7f3d0', padding: '2px 8px', borderRadius: '12px', fontSize: '14px', color: '#064e3b', fontWeight: 'bold' }}>
+              {carregandoHistorico ? '...' : historico?.length || 0}
+            </span>
+          </div>
+
+          {/* BARRA DE BUSCA */}
+          <div style={{ position: 'relative', marginBottom: '16px' }}>
+            <Search size={18} color="#059669" style={{ position: 'absolute', left: '10px', top: '10px' }} />
+            <input 
+              type="text" 
+              placeholder="Buscar por placa ou modelo..." 
+              value={termoBusca}
+              onChange={(e) => setTermoBusca(e.target.value)}
+              style={{ 
+                width: '100%', padding: '10px 10px 10px 36px', borderRadius: '6px', 
+                border: '1px solid #34d399', boxSizing: 'border-box', outline: 'none'
+              }}
+            />
+          </div>
+          
+          <div style={{ marginTop: '16px', maxHeight: '75vh', overflowY: 'auto', paddingRight: '4px' }}>
+            {!carregandoHistorico && historicoFiltrado?.map(carro => (
+              <CardCarro key={carro.id} carro={carro} />
+            ))}
+            
+            {!carregandoHistorico && historicoFiltrado?.length === 0 && (
+              <p style={{ textAlign: 'center', color: '#047857', fontStyle: 'italic' }}>
+                {termoBusca ? 'Nenhum veículo encontrado na busca.' : 'Nenhum carro finalizado ainda.'}
+              </p>
+            )}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
