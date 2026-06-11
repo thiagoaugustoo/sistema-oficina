@@ -1,20 +1,16 @@
-# Estágio 1: Instala e faz o build usando o Node 22 oficial (mais estável para o Vite 8)
-FROM node:22 AS builder
+# Estágio 1: Instala e faz o build usando o Node 23
+FROM node:23 AS builder
 WORKDIR /app
 
-# Puxa as variáveis do Supabase do Dokploy para dentro do site
-ARG VITE_SUPABASE_URL
-ARG VITE_SUPABASE_ANON_KEY
-ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
-ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
-
-# Instala as dependências e constrói o projeto
+# Copia tudo, incluindo o .env.production
 COPY package*.json ./
 RUN npm install
 COPY . .
+
+# O Vite vai ler automaticamente o .env.production aqui!
 RUN npm run build
 
-# Estágio 2: Pega o site pronto e serve no Nginx (muito mais leve e rápido)
+# Estágio 2: Pega o site pronto e serve no Nginx
 FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 EXPOSE 80
