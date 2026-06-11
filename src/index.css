@@ -16,6 +16,7 @@ body {
   background-color: var(--bg-app);
   color: var(--text-main);
   font-family: 'Inter', system-ui, sans-serif;
+  touch-action: manipulation;
 }
 
 /* Barra de rolagem estilizada */
@@ -71,7 +72,8 @@ button {
   font-size: 16px !important;
 }
 
-/* Desativa o duplo toque para dar zoom e bloqueia comportamentos de toque indesejados */
-* {
-  touch-action: manipulation;
+input, 
+textarea, 
+select {
+  font-size: 16px !important;
 }
