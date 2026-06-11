@@ -33,6 +33,7 @@ export default function App() {
   });
 
   return (
+  <div>
     <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
       
       {/* CABEÇALHO COM BOTÃO DE LOGIN/LOGOUT */}
@@ -116,5 +117,6 @@ export default function App() {
 
       <ModalLogin isOpen={modalLoginAberto} onClose={() => setModalLoginAberto(false)} />
     </div>
+  </div>
   );
 }
